@@ -3,6 +3,8 @@ import urllib
 import datetime
 from flask import Flask, jsonify, redirect, request, session
 
+from etl import extract_transform_load
+
 
 app = Flask(__name__)
 app.secret_key = 'g6f7d8-h7gf8d9-n8b9vc0-0n9m876nbvcx' # an arbitrary string as it's required when access session
@@ -13,7 +15,6 @@ REDIRECT_URI = 'http://localhost:8080/callback'
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
-API_BASE_URL = 'https://api.spotify.com/v1/'
 
 @app.route('/')
 def index():
@@ -97,9 +98,9 @@ def get_recently_played_tunes():
   if datetime.datetime.now().timestamp() > session['expires_at']:
     return redirect('/refresh-token')
   
-  # TODO: request the tunes played yesterday
+  tunes = extract_transform_load(session['access_token'])
 
-  return "retrieving the tunes played yesterday"
+  return tunes
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port='8080', debug=True)
