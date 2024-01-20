@@ -1,1 +1,8 @@
+# virtual environment
 spotifyETL/
+
+# .pyc files
+__pycache__/
+
+# database
+listening_history.sqlite
