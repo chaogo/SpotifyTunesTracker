@@ -6,14 +6,14 @@ from airflow.providers.http.hooks.http import HttpHook
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 import pandas as pd
+import requests
 import sqlalchemy
-import os
 
 
 # configuration variables - temporary solution
-INITIAL_ACCESS_TOKEN = 'BQBk_x5R_30nyvnH-ZIcHBtwsaUjSSd9Y1tCCtY59d507z_KQF9YGhji3cKlRr46sRA-liMD_29y6kS25MNsaoZcfr2vvEuAAD_dPtNQYEyuxIlQ6tp__JbrMxiLpw-S6rNNBP4tmM-etm6tZSkcrsz06Te8n-C_ACEsb9SUBf4HHmZ0dACwVNBM37xFISkFOtwYG6bjv88'
-INITIAL_ACCESS_TOKEN_EXPIRES_AT = '1705892613.497559'
-REFRESH_TOKEN = 'AQDnEeS29_axyQQlWS4osFRVkFrkSbzS45qnY4N1QzD9-EIJaB8KEMxCeAI2Y8Mm4wyf8evspkThQCT3bRZ8b7lpxJuC7IGAYcCvVfb43w7L60xMx4-QstUS0LRU9NYrfNo'
+INITIAL_ACCESS_TOKEN = 'BQAxIEm3bBeRetDbSYz59EFzwQQ-W8DvQ0UiYez15aMT63cXVG6CrKjAf6QExPbZB122MrIjCXv7rzx3c_bviYUzH5fL8vSvRv_eQ4a1gLaWATaAezfdX-cu06eCSyRqKgbtAGseUPLZZDG9BKsd95E24B5CW2L54qi4kM0LgvK3KTKQo15yj16piYBJerjI-wO-A2uWbiY'
+INITIAL_ACCESS_TOKEN_EXPIRES_AT = '1705800834.688717'
+REFRESH_TOKEN = 'AQC-CUF-zmajDdUJx6UNLwMYbh4xe7greHBfGY8jh3mBWICoLafcQgy-Iit-ock4ymFC9HDapitTTS96DU7N9WwzZjIafyCVpdcLGqC9AU4YbfJ9SfKB3xPg7TF9TMvpERg'
 CLIENT_ID = 'ca23a84ad19a4992a2338c327f457338'
 CLIENT_SECRET = 'c087704f66894d31b1a2e32ac3a220dc'
 DATABASE = 'listening_history.sqlite'
@@ -48,7 +48,7 @@ dag = DAG(
 def refresh_token():
   # check if current access token has expired
   print("printing...", float(Variable.get('expires_at')))
-  if datetime.now().timestamp() < float(Variable.get('expires_at')):
+  if datetime.now().timestamp() > float(Variable.get('expires_at')):
     print(Variable.get('refresh_token'), Variable.get('client_id'), Variable.get('client_secret'))
     req_body = {
         'grant_type': 'refresh_token',
@@ -57,12 +57,10 @@ def refresh_token():
         'client_secret': Variable.get('client_secret'), 
     }
 
-    # make the HTTP request to refresh the token, http_conn has been set up in Airflow UI
-    http_hook = HttpHook(method='POST', http_conn_id='spotify_api')
-    response = http_hook.run(
-        endpoint='https://accounts.spotify.com/api/token',
-        data=req_body
-    )
+    print(req_body)
+
+    # make the HTTP request to refresh the token
+    response = requests.post('https://accounts.spotify.com/api/token', data=req_body)
 
     # Update Airflow Variables of token info
     new_token_info = response.json()
@@ -82,14 +80,11 @@ def perform_etl():
   after_timestamp = int((datetime.now() - timedelta(days=1)).timestamp()) * 1000
   limit = 50
 
-  # make the HTTP request to get recently played data, http_conn has been set up in Airflow UI
-  http_hook = HttpHook(http_conn_id='spotify_api')
-  response = http_hook.run(
-      endpoint=f'/v1/me/player/recently-played?after={after_timestamp}&limit={limit}',
-      method='GET',
-      headers=header
-  )
+  # make the HTTP request to get recently played data
+  response = requests.get(f'https://api.spotify.com/v1/me/player/recently-played?after={after_timestamp}&limit={limit}', headers=header)
   data = response.json()
+
+  print(data)
 
   # transform and validate
 
