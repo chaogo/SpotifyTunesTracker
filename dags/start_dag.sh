@@ -1,0 +1,13 @@
+# to avoid http request hanging up : https://github.com/apache/airflow/discussions/24463
+export NO_PROXY="*"
+
+# export configurations
+export INITIAL_ACCESS_TOKEN='BQAxIEm3bBeRetDbSYz59EFzwQQ-W8DvQ0UiYez15aMT63cXVG6CrKjAf6QExPbZB122MrIjCXv7rzx3c_bviYUzH5fL8vSvRv_eQ4a1gLaWATaAezfdX-cu06eCSyRqKgbtAGseUPLZZDG9BKsd95E24B5CW2L54qi4kM0LgvK3KTKQo15yj16piYBJerjI-wO-A2uWbiY'
+export INITIAL_ACCESS_TOKEN_EXPIRES_AT='1705800834.688717'
+export REFRESH_TOKEN=AQC-CUF-zmajDdUJx6UNLwMYbh4xe7greHBfGY8jh3mBWICoLafcQgy-Iit-ock4ymFC9HDapitTTS96DU7N9WwzZjIafyCVpdcLGqC9AU4YbfJ9SfKB3xPg7TF9TMvpERg
+export CLIENT_ID='ca23a84ad19a4992a2338c327f457338'
+export CLIENT_SECRET='c087704f66894d31b1a2e32ac3a220dc'
+export DATABASE='listening_history.sqlite'
+
+# start airflow
+airflow standalone

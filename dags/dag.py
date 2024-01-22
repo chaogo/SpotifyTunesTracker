@@ -8,23 +8,15 @@ from airflow.utils.dates import days_ago
 import pandas as pd
 import requests
 import sqlalchemy
-
-
-# configuration variables - temporary solution
-INITIAL_ACCESS_TOKEN = 'BQAxIEm3bBeRetDbSYz59EFzwQQ-W8DvQ0UiYez15aMT63cXVG6CrKjAf6QExPbZB122MrIjCXv7rzx3c_bviYUzH5fL8vSvRv_eQ4a1gLaWATaAezfdX-cu06eCSyRqKgbtAGseUPLZZDG9BKsd95E24B5CW2L54qi4kM0LgvK3KTKQo15yj16piYBJerjI-wO-A2uWbiY'
-INITIAL_ACCESS_TOKEN_EXPIRES_AT = '1705800834.688717'
-REFRESH_TOKEN = 'AQC-CUF-zmajDdUJx6UNLwMYbh4xe7greHBfGY8jh3mBWICoLafcQgy-Iit-ock4ymFC9HDapitTTS96DU7N9WwzZjIafyCVpdcLGqC9AU4YbfJ9SfKB3xPg7TF9TMvpERg'
-CLIENT_ID = 'ca23a84ad19a4992a2338c327f457338'
-CLIENT_SECRET = 'c087704f66894d31b1a2e32ac3a220dc'
-DATABASE = 'listening_history.sqlite'
+import os
 
 # save configurations to Airflow Variables
-Variable.set('access_token', INITIAL_ACCESS_TOKEN)
-Variable.set('refresh_token', REFRESH_TOKEN)
-Variable.set('expires_at', INITIAL_ACCESS_TOKEN_EXPIRES_AT)
-Variable.set('client_id', CLIENT_ID)
-Variable.set('client_secret', CLIENT_SECRET)
-Variable.set('database', DATABASE)
+Variable.set('access_token', os.environ.get('INITIAL_ACCESS_TOKEN'))
+Variable.set('expires_at', os.environ.get('INITIAL_ACCESS_TOKEN_EXPIRES_AT'))
+Variable.set('refresh_token', os.environ.get('REFRESH_TOKEN'))
+Variable.set('client_id', os.environ.get('CLIENT_ID'))
+Variable.set('client_secret', os.environ.get('CLIENT_SECRET'))
+Variable.set('database', os.environ.get('DATABASE'))
 print("printing...", Variable.get('expires_at'))
 
 default_args = {
@@ -67,8 +59,6 @@ def refresh_token():
     Variable.set("access_token", new_token_info['access_token'])
     Variable.set("expires_at", datetime.now().timestamp()+new_token_info['expires_in'])
     print(Variable.get('access_token'), Variable.get('expires_at'))
-
-  return
 
 def perform_etl():
  # extract all songs listened for the last 24 hours
